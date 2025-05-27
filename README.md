@@ -34,7 +34,7 @@ Place in `C:/xampp/htdocs/book-rental`
 
 ### 3. Create Database
 ```sql
-CREATE DATABASE inventaris_buku CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+CREATE DATABASE book_rental CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 ```
 
 ### 4. Configure Connection
