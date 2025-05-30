@@ -46,11 +46,17 @@ class MySQLBookRepository implements BookRepository
 
     public function update(int $id, Book $book): bool
     {
+        $check = $this->pdo->prepare("SELECT cover_filename FROM books WHERE id = ?");
+        $check->execute([$id]);
+        $result = $check->fetch(PDO::FETCH_ASSOC);
+
+        $oldCover = $result['cover_filename'];
+
         $stmt = $this->pdo->prepare(
             "UPDATE books SET code = ?, title = ?, author = ?, publisher = ?, stock = ?, cover_filename = ?
              WHERE id = ?"
         );
-        return $stmt->execute([
+        $success = $stmt->execute([
             $book->code,
             $book->title,
             $book->author,
@@ -59,10 +65,28 @@ class MySQLBookRepository implements BookRepository
             $book->cover_filename,
             $id
         ]);
+
+        if ($success && !is_null($oldCover)) {
+            $coverPath = __DIR__ . "/../../public/uploads/" . $oldCover;
+            if (file_exists($coverPath)) {
+                unlink($coverPath);
+            }
+        }
+
+        return $success;
     }
 
     public function delete(int $id): bool
     {
+        $cover = $this->pdo->prepare("SELECT cover_filename FROM books WHERE id = ?");
+        $cover->execute([$id]);
+        $coverResult = $cover->fetch(PDO::FETCH_ASSOC);
+
+        if (!is_null($coverResult)) {
+            $coverPath = __DIR__ . "/../../public/uploads/" . $coverResult['cover_filename'];
+            unlink($coverPath);
+        }
+
         $stmt = $this->pdo->prepare("DELETE FROM books WHERE id = ?");
         return $stmt->execute([$id]);
     }
